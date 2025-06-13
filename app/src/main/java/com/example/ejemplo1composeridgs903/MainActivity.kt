@@ -1,12 +1,14 @@
 package com.example.ejemplo1composeridgs903
 
 import android.annotation.SuppressLint
+import android.content.Context
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
@@ -24,10 +26,15 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.PaintingStyle
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.tooling.preview.Preview
@@ -75,25 +82,34 @@ fun Tarjeta(personajes: List<PersonajeTarjeta>){
 }
 
 @Composable
-fun Personaje(name: String, color: Color, style: TextStyle){
-    Text(text = name)
-}
-
-@Composable
 fun Personajes(personaje: PersonajeTarjeta){
-    Column {
+    var expanded by remember { mutableStateOf(false) }
+
+    Column(
+        modifier = Modifier.padding(start = 8.dp).clickable {
+            expanded = !expanded
+        }
+    ) {
         Personaje(personaje.title,
             MaterialTheme.colorScheme.primary,
             MaterialTheme.typography.headlineMedium)
 
         Personaje(personaje.body,
-            MaterialTheme.colorScheme.primary,
-            MaterialTheme.typography.headlineMedium)
+            MaterialTheme.colorScheme.onBackground,
+            MaterialTheme.typography.bodyLarge,
+            if(expanded) Int.MAX_VALUE else 1
+        )
+
     }
 }
 
+
 @Composable
-fun ImagenHeroe(){
+fun ImagenHeroe(imageName : String){
+    val context = LocalContext.current
+    val ImageResId = remember (imageName) {
+        context.resources.getIdentifier(imageName.lowercase(), "drawable", context.packageName)
+    }
     Image(
         painter = painterResource(R.drawable.logo),
         contentDescription = "Goku",
@@ -106,19 +122,26 @@ fun ImagenHeroe(){
 }
 
 @Composable
+fun Personaje(name: String, color: Color, style: TextStyle, lines:Int=Int.MAX_VALUE){
+    Text(text = name, color = color, style = style, maxLines = lines)
+}
+
+@Composable
 fun MyPersonajes(personaje: PersonajeTarjeta){
-    Card{
+    Card(
         modifier = Modifier
             .padding(16.dp)
             .fillMaxWidth(),
-        elevation = CardDefaults.cardElevation(defaultElevation = )
-        shape = RoundedCornerShape
-
-
-    }
-    Row {
-        ImagenHeroe()
-        Personajes(personaje)
+        elevation = CardDefaults.cardElevation(defaultElevation = 8.dp),
+        shape = RoundedCornerShape(16.dp),
+        colors = CardDefaults.cardColors(containerColor = Color.White)
+    ){
+        Row (
+            modifier = Modifier.padding(8.dp).background(MaterialTheme.colorScheme.background)
+        ) {
+            ImagenHeroe(personaje.title)
+            Personajes(personaje)
+        }
     }
 }
 
